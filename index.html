@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BrandSentinel - Brand review before publishing</title>
+<style>
+:root{--navy:#0B1F3A;--teal:#0F9D8A;--amber:#F2A93B;--coral:#E4572E;--blue:#2F6FDE;--violet:#6D4AFF;--bg:#F6F8FB;--card:#fff;--line:#D8E0EA;--ink:#1F2937;--mute:#5B6B82}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:var(--navy);color:#fff;display:flex;align-items:center;gap:18px;padding:10px 20px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;letter-spacing:.2px}
+header h1 span{color:var(--teal)}
+nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+nav button{background:transparent;border:0;color:#C7D4E5;padding:8px 12px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:#17325A;color:#fff}
+.who{display:flex;align-items:center;gap:8px;font-size:13px}
+select,input,textarea,button{font:inherit}
+select,input[type=text],input[type=search],textarea{border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:#fff;color:var(--ink);width:100%}
+header select{width:auto}
+:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+h2{margin:6px 0 12px;font-size:20px;color:var(--navy)}
+h3{margin:0 0 8px;font-size:15px;color:var(--navy)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.col{flex:1;min-width:280px}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.warn{background:var(--coral)}
+.btn.navy{background:var(--navy)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:700;color:#fff;background:var(--mute)}
+.s-draft{background:#7B8BA3}.s-ai_reviewed{background:var(--blue)}.s-in_review{background:var(--amber);color:#3a2a00}.s-changes_requested{background:var(--coral)}.s-awaiting_signoff{background:var(--violet)}.s-approved{background:var(--teal)}.s-publish_ready{background:#0a6b5e}
+.sev-high{background:var(--coral)}.sev-medium{background:var(--amber);color:#3a2a00}.sev-low{background:#7B8BA3}.sev-info{background:var(--teal)}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;color:var(--mute);letter-spacing:.4px}
+tr.link{cursor:pointer}tr.link:hover{background:#F0F5FA}
+.doc{white-space:pre-wrap;line-height:1.8;font-size:16px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px}
+mark{padding:1px 2px;border-radius:3px;cursor:pointer;color:inherit}
+mark.high{background:#FFD9CF;border-bottom:2px solid var(--coral)}
+mark.medium{background:#FFEBC6;border-bottom:2px solid var(--amber)}
+mark.low{background:#E5EAF1;border-bottom:2px solid #7B8BA3}
+mark.info{background:#D6F2EC;border-bottom:2px solid var(--teal)}
+.find{border:1px solid var(--line);border-left:5px solid var(--mute);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:#fff}
+.find.high{border-left-color:var(--coral)}.find.medium{border-left-color:var(--amber)}.find.info{border-left-color:var(--teal)}
+.find.flash{box-shadow:0 0 0 3px var(--amber)}
+.find .meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.find .src{font-size:12px;color:var(--mute)}
+.find .sug{background:#F0F7F5;border-radius:6px;padding:6px 8px;margin:6px 0;font-size:14px}
+.find .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.dim{color:var(--mute)}
+.small{font-size:13px}
+.bar{height:14px;border-radius:4px;background:var(--teal);min-width:2px}
+.hist li,.cm li{margin-bottom:6px}
+.banner{background:#FFF6E0;border:1px solid #F2D9A0;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+.ok{background:#E8F7F3;border-color:#B8E4DA}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.kpi{font-size:28px;font-weight:700;color:var(--navy)}
+img.thumb{max-width:260px;border:1px solid var(--line);border-radius:8px}
+.sw{display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid var(--line);vertical-align:middle;margin-right:4px}
+footer{text-align:center;color:var(--mute);font-size:12px;padding:20px}
+.sr{position:absolute;left:-9999px}
+[hidden]{display:none!important}
+@media(max-width:640px){header{padding:8px 12px}.doc{font-size:15px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Brand<span>Sentinel</span></h1>
+  <nav id="nav" aria-label="Main"></nav>
+  <div class="who"><label for="role">Signed in as</label>
+    <select id="role" aria-label="Switch demo user"></select></div>
+</header>
+<main id="app"></main>
+<footer>BrandSentinel Round 2 build by Team Codestrom. Demo brand "Lumio Home" is fictional. Review checks run in your browser; no content is sent to any external service.</footer>
+
+<script>
+(function () {
+'use strict';
+/* ---------- helpers ---------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = p => p + Math.random().toString(36).slice(2, 8);
+const now = () => new Date().toISOString();
+const fmt = t => new Date(t).toLocaleString([], {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const USERS = {
+  creator:  {name:'Priya Sharma',  title:'Content Creator'},
+  manager:  {name:'Arjun Mehta',   title:'Content Manager'},
+  reviewer: {name:'Neha Kapoor',   title:'Authorised Reviewer'},
+  admin:    {name:'Rohan Iyer',    title:'Brand Admin'}
+};
+const STATUS = {draft:'Draft', ai_reviewed:'AI-reviewed', in_review:'In review', changes_requested:'Changes requested', awaiting_signoff:'Awaiting sign-off', approved:'Approved', publish_ready:'Publish-ready'};
+const RULES = {TERM:'Terminology', TONE:'Tone and voice', ABS:'Absolute claim', CLAIM:'Fact check', A11Y:'Accessibility', VIS:'Visual consistency'};
+
+/* ---------- demo brand knowledge base ---------- */
+function seedKB() {
+  return {
+    brand: 'Lumio Home (fictional demo brand)',
+    terms: [
+      {bad:'Lumio Lite', good:'Lumio Glow', why:'Lumio Lite was retired in 2025; the current product is Lumio Glow.'},
+      {bad:'Lumio Home App', good:'Lumio app', why:'The app is named "Lumio app" in all customer content.'},
+      {bad:'cheap', good:'affordable', why:'Brand voice never uses "cheap"; use "affordable".'},
+      {bad:'LED lamp', good:'smart bulb', why:'Use "smart bulb" for the product category.'}
+    ],
+    facts: [
+      {id:'F1', text:'Lumio Glow bulbs are rated for up to 25,000 hours of use.', source:'Product Spec Sheet v4, p.2'},
+      {id:'F2', text:'Lumio Glow uses up to 80% less energy than a traditional incandescent bulb.', source:'Product Spec Sheet v4, p.3'},
+      {id:'F3', text:'Lumio Glow connects over Wi-Fi and Bluetooth and works with the Lumio app on Android and iOS.', source:'Product Spec Sheet v4, p.1'},
+      {id:'F4', text:'Lumio Glow comes with a 2-year limited warranty.', source:'Warranty Policy 2026'},
+      {id:'F5', text:'Lumio Glow is available in India in 12 cities as of October 2026.', source:'Delivery Coverage Sheet, Oct 2026'},
+      {id:'F6', text:'Lumio Home was founded in 2021.', source:'Company Fact Sheet'}
+    ],
+    palette: ['#0B1F3A', '#0F9D8A', '#F2A93B', '#FFFFFF', '#F7F4EE'],
+    acronyms: ['LED','IoT','USB','FAQ','AI','FAQ','CEO','UK','US','EMI','GST'],
+    maxExclaim: 1
+  };
+}
+function seedContents() {
+  const t = Date.now();
+  const mk = (title, text, minsAgo) => ({
+    id: uid('c'), title, author: 'creator', text, status: 'draft', findings: [], dismissed: {}, decisions: [],
+    comments: [], alt: '', image: null, fg: '', bg: '', reviewedText: null, hadHigh: false,
+    versions: [{ts: new Date(t - minsAgo * 60000).toISOString(), actor: USERS.creator.name, text}],
+    history: [{ts: new Date(t - minsAgo * 60000).toISOString(), actor: USERS.creator.name, action: 'Created draft', note: ''}]
+  });
+  return [
+    mk('Diwali offer - social post', 'OMG guys, Lumio Lite is the BEST smart bulb in India!! We guarantee 100% savings on your bill. Our bulbs last 40,000 hours and cost super cheap. Click here to buy now.', 90),
+    mk('Warranty FAQ answer', 'Every Lumio Glow comes with a 2-year limited warranty. It works with the Lumio app on Android and iOS.', 60),
+    mk('City launch note', 'Lumio Glow is available in 25 cities across India. Lumio Home was founded in 2018.', 30)
+  ];
+}
+
+/* ---------- state ---------- */
+const KEY = 'brandsentinel_r2_state';
+let mem = null;
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+  return mem;
+}
+function save() { mem = S; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+let S = load();
+if (!S) {
+  S = {kb: seedKB(), contents: seedContents(), audit: [], role: 'creator', view: 'content', openId: null, mode: 'review'};
+  save();
+}
+const me = () => USERS[S.role];
+function log(c, action, note) {
+  const e = {ts: now(), actor: me().name, role: S.role, action, note: note || ''};
+  if (c) c.history.push(e);
+  S.audit.push(Object.assign({content: c ? c.title : '-'}, e));
+}
+
+/* ---------- review engine ---------- */
+const STOP = new Set('a an the and or of to in on for with is are was were be been it its this that these those at by from as our we you your their they i can will have has had not no do does so than then into over about'.split(' '));
+const tok = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
+const nums = s => (s.match(/\d[\d,]*(?:\.\d+)?/g) || []).map(n => n.replace(/,/g, ''));
+
+function buildIndex(facts) {
+  const docs = facts.map(f => tok(f.text));
+  const df = {};
+  docs.forEach(d => new Set(d).forEach(w => df[w] = (df[w] || 0) + 1));
+  const N = docs.length;
+  const idf = w => Math.log((N + 1) / ((df[w] || 0) + 1)) + 1;
+  const vec = ws => { const v = {}; ws.forEach(w => v[w] = (v[w] || 0) + idf(w)); return v; };
+  const norm = v => Math.sqrt(Object.values(v).reduce((a, b) => a + b * b, 0)) || 1;
+  const fv = docs.map(vec);
+  return {
+    best(sentence) {
+      const sv = vec(tok(sentence)); const sn = norm(sv);
+      let best = {sim: 0, i: -1};
+      fv.forEach((v, i) => {
+        let dot = 0; for (const w in sv) if (v[w]) dot += sv[w] * v[w];
+        const sim = dot / (sn * norm(v));
+        if (sim > best.sim) best = {sim, i};
+      });
+      return best;
+    }
+  };
+}
+
+const ABS = [
+  {re: /\b100\s?%/gi, label: 'absolute percentage'},
+  {re: /\bguarantee(?:d|s)?\b/gi, label: 'guarantee'},
+  {re: /\b(?:best|cheapest|fastest|greenest|no\.\s?1|number one)\b/gi, label: 'unproven superlative'},
+  {re: /\b(?:never fails?|always works?|risk[- ]free|zero risk|miracle|instantly)\b/gi, label: 'absolute promise'}
+];
+const SLANG = {omg:'', guys:'everyone', gonna:'going to', wanna:'want to', super:'very', awesome:'excellent', dude:'', btw:'by the way', 'lol':''};
+const CLAIM_HINT = /\b(cures?|cured|treats?|prevents?|heals?|relieves?|eliminates?|kills?|helps? you sleep|save[sd]?|saving[s]?|reduce[sd]?|improve[sd]?|boost(?:s|ed)?|proven|certified|award|rated|ranked|clinically|tested|approved by|longer|faster|cheaper|less|more than|lasts?|available|founded|warranty|cities|hours|years?)\b/i;
+const SUPPORT_T = 0.30;
+
+function sentences(text) {
+  const out = []; const re = /[^.!?\n]+[.!?]*/g; let m;
+  while ((m = re.exec(text))) {
+    const raw = m[0]; const lead = raw.length - raw.trimStart().length;
+    const t = raw.trim(); if (t.length < 3) continue;
+    out.push({text: t, start: m.index + lead, end: m.index + lead + t.length});
+  }
+  return out;
+}
+function capFix(orig, rep) { return /^[A-Z]/.test(orig) && rep ? rep[0].toUpperCase() + rep.slice(1) : rep; }
+
+function hexRgb(h) { h = (h || '').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); if (!/^[0-9a-f]{6}$/i.test(h)) return null; return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); }
+function lum(rgb) { const f = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }; return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]); }
+function contrast(a, b) { const A = hexRgb(a), B = hexRgb(b); if (!A || !B) return null; const l1 = lum(A), l2 = lum(B); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); }
+
+function reviewText(text, kb, opts) {
+  opts = opts || {};
+  const F = [];
+  const add = f => F.push(Object.assign({state: f.severity === 'info' ? 'info' : 'open', advice: '', replace: null, rs: null, re: null}, f));
+  const idx = buildIndex(kb.facts);
+
+  // 1. terminology (deterministic)
+  kb.terms.forEach(t => {
+    const re = new RegExp('\\b' + reEsc(t.bad) + '\\b', 'gi'); let m;
+    while ((m = re.exec(text))) add({rule: 'TERM', severity: 'medium', start: m.index, end: m.index + m[0].length, snippet: m[0],
+      why: '"' + m[0] + '" is not approved wording. ' + t.why, source: 'Terminology list', suggestion: capFix(m[0], t.good), replace: capFix(m[0], t.good), rs: m.index, re: m.index + m[0].length});
+  });
+
+  // 2. absolute / unproven claims (deterministic policy)
+  const absSpans = [];
+  ABS.forEach(a => {
+    a.re.lastIndex = 0; let m;
+    while ((m = a.re.exec(text))) {
+      absSpans.push([m.index, m.index + m[0].length]);
+      const sent = sentences(text).find(s => m.index >= s.start && m.index < s.end);
+      let adv = 'Replace it with wording that an approved fact supports, or send it to the Authorised Reviewer.';
+      let rep = null, rs = null, rend = null, sug = '';
+      if (sent) {
+        const b = idx.best(sent.text);
+        if (b.i >= 0 && b.sim >= 0.25) {
+          const f = kb.facts[b.i]; sug = f.text; rep = f.text; rs = sent.start; rend = sent.end;
+          adv = 'Closest approved fact is ' + f.id + ' (' + f.source + '). You may use its wording instead of this sentence.';
+        }
+      }
+      add({rule: 'ABS', severity: 'high', start: m.index, end: m.index + m[0].length, snippet: m[0],
+        why: 'Promotional ' + a.label + ' ("' + m[0] + '") without an approved source. Unsupported claims must not be published.',
+        source: 'Claims policy: absolute and unproven claims', suggestion: sug, advice: adv, replace: rep, rs, re: rend});
+    }
+  });
+
+  // 3. fact check of claim-like sentences (retrieval + number comparison)
+  sentences(text).forEach(s => {
+    if (absSpans.some(a => a[0] >= s.start && a[0] < s.end)) return;
+    const sn = nums(s.text);
+    if (!(sn.length || CLAIM_HINT.test(s.text))) return;
+    const b = idx.best(s.text);
+    if (b.i >= 0 && b.sim >= SUPPORT_T) {
+      const f = kb.facts[b.i]; const fn = nums(f.text);
+      const bad = sn.filter(n => !fn.includes(n));
+      if (sn.length && bad.length) {
+        add({rule: 'CLAIM', severity: 'high', start: s.start, end: s.end, snippet: s.text,
+          why: 'Figure(s) ' + bad.join(', ') + ' do not match approved fact ' + f.id + ': "' + f.text + '"',
+          source: f.id + ': ' + f.source, suggestion: f.text, replace: f.text, rs: s.start, re: s.end, advice: 'Use the approved figure.'});
+      } else {
+        add({rule: 'CLAIM', severity: 'info', start: s.start, end: s.end, snippet: s.text,
+          why: 'Supported by approved fact ' + f.id + ' (similarity ' + b.sim.toFixed(2) + ').', source: f.id + ': ' + f.source, suggestion: ''});
+      }
+    } else {
+      add({rule: 'CLAIM', severity: 'medium', start: s.start, end: s.end, snippet: s.text,
+        why: 'This sentence makes a factual claim but no approved fact supports it. BrandSentinel does not guess: please add a source or have a reviewer check it.',
+        source: 'No matching approved fact', suggestion: '', advice: 'Add an approved fact to the Knowledge Base, rewrite the sentence, or dismiss with a reason.'});
+    }
+  });
+
+  // 4. tone and voice
+  Object.keys(SLANG).forEach(w => {
+    const re = new RegExp('\\b' + reEsc(w) + '\\b', 'gi'); let m;
+    while ((m = re.exec(text))) add({rule: 'TONE', severity: 'low', start: m.index, end: m.index + m[0].length, snippet: m[0],
+      why: '"' + m[0] + '" is informal slang; the brand voice is friendly but professional.', source: 'Voice and tone guide', suggestion: SLANG[w] ? capFix(m[0], SLANG[w]) : '(remove)', replace: SLANG[w], rs: m.index, re: m.index + m[0].length});
+  });
+  const caps = new Set(kb.acronyms.map(a => a.toUpperCase()));
+  const re2 = /\b[A-Z]{4,}\b/g; let mm;
+  while ((mm = re2.exec(text))) if (!caps.has(mm[0]) && !/^[A-Z]{4,}$/.test(text.trim())) {
+    const w = mm[0]; add({rule: 'TONE', severity: 'low', start: mm.index, end: mm.index + w.length, snippet: w,
+      why: 'ALL CAPS reads as shouting and is not allowed in brand copy.', source: 'Voice and tone guide', suggestion: w[0] + w.slice(1).toLowerCase(), replace: w[0] + w.slice(1).toLowerCase(), rs: mm.index, re: mm.index + w.length});
+  }
+  const ex = /!{2,}|!/g; let em; let count = 0;
+  while ((em = ex.exec(text))) {
+    count++;
+    if (em[0].length > 1 || count > kb.maxExclaim) add({rule: 'TONE', severity: 'low', start: em.index, end: em.index + em[0].length, snippet: em[0],
+      why: 'Too many exclamation marks. The guide allows at most ' + kb.maxExclaim + ' per piece.', source: 'Voice and tone guide', suggestion: '.', replace: '.', rs: em.index, re: em.index + em[0].length});
+  }
+
+  // 5. accessibility (text)
+  const cl = /\b(click here|read more|learn more|here)\b(?=[^.]*\b(?:buy|link|download|visit)\b|\.)/gi; let cm;
+  const clk = /\bclick here\b/gi;
+  while ((cm = clk.exec(text))) add({rule: 'A11Y', severity: 'medium', start: cm.index, end: cm.index + cm[0].length, snippet: cm[0],
+    why: '"Click here" gives no meaning to screen-reader users who navigate by links.', source: 'WCAG 2.2: 2.4.4 Link Purpose', suggestion: 'Buy Lumio Glow', replace: 'Buy Lumio Glow', rs: cm.index, re: cm.index + cm[0].length, advice: 'Use descriptive link text.'});
+  sentences(text).forEach(s => { const w = s.text.split(/\s+/).length; if (w > 30) add({rule: 'A11Y', severity: 'low', start: s.start, end: s.end, snippet: s.text,
+    why: 'Sentence has ' + w + ' words; long sentences are hard to read.', source: 'Accessibility policy: plain language', suggestion: '', advice: 'Split into shorter sentences.'}); });
+
+  // 6. contrast + image (supplied by the content form)
+  if (opts.fg && opts.bg) {
+    const r = contrast(opts.fg, opts.bg);
+    if (r === null) add({rule: 'A11Y', severity: 'low', start: -1, end: -1, snippet: 'Contrast colours', why: 'Could not read the colour values. Use hex such as #0B1F3A.', source: 'WCAG 2.2: 1.4.3 Contrast', suggestion: ''});
+    else if (r < 4.5) add({rule: 'A11Y', severity: 'medium', start: -1, end: -1, snippet: 'Text ' + opts.fg + ' on ' + opts.bg,
+      why: 'Contrast ratio is ' + r.toFixed(2) + ':1; WCAG 2.2 AA needs at least 4.5:1 for normal text.', source: 'WCAG 2.2: 1.4.3 Contrast', suggestion: '', advice: 'Choose a darker text colour or lighter background.'});
+  }
+  if (opts.image) {
+    if (!opts.alt || opts.alt.trim().length < 5) add({rule: 'A11Y', severity: 'medium', start: -1, end: -1, snippet: 'Image alternative text',
+      why: 'The image has no meaningful alternative text.', source: 'WCAG 2.2: 1.1.1 Non-text Content', suggestion: '', advice: 'Describe what the image shows in one short sentence.'});
+    (opts.image.colors || []).forEach(c => { if (c.off) add({rule: 'VIS', severity: 'medium', start: -1, end: -1, snippet: 'Colour ' + c.hex + ' (' + Math.round(c.share * 100) + '% of image)',
+      why: 'Colour ' + c.hex + ' is not close to the approved palette. Nearest approved colour is ' + c.nearest + '.', source: 'Visual guide: approved palette', suggestion: '', advice: 'Recolour to the brand palette or use an approved asset.'}); });
+    if (opts.image.w < 400) add({rule: 'VIS', severity: 'low', start: -1, end: -1, snippet: 'Image width ' + opts.image.w + 'px',
+      why: 'Image is smaller than 400px wide and may look blurry.', source: 'Visual guide: minimum image size', suggestion: ''});
+  }
+  F.forEach(f => f.key = f.rule + '|' + f.snippet.toLowerCase());
+  return F;
+}
+
+function runReview(c) {
+  const f = reviewText(c.text, S.kb, {alt: c.alt, image: c.image, fg: c.fg, bg: c.bg});
+  f.forEach(x => { x.id = uid('f'); if (c.dismissed[x.key] !== undefined) { x.state = 'dismissed'; x.reason = c.dismissed[x.key]; } });
+  f.sort((a, b) => (a.start < 0 ? 1e9 : a.start) - (b.start < 0 ? 1e9 : b.start));
+  c.findings = f; c.reviewedText = c.text;
+  if (f.some(x => x.severity === 'high')) c.hadHigh = true;
+  return f;
+}
+
+/* ---------- permissions + workflow ---------- */
+const openHigh = c => c.findings.filter(f => f.severity === 'high' && f.state === 'open');
+const editable = c => S.role === 'creator' && ['draft', 'ai_reviewed', 'changes_requested'].includes(c.status);
+const stale = c => c.reviewedText !== c.text;
+
+function act(id, what, arg) {
+  const c = S.contents.find(x => x.id === id); if (!c) return;
+  if (what === 'review') {
+    if (!editable(c)) return;
+    if (arg && arg.text !== undefined && arg.text !== c.text) { c.text = arg.text; c.versions.push({ts: now(), actor: me().name, text: c.text}); log(c, 'Edited text', ''); }
+    if (arg) { c.alt = arg.alt || ''; c.fg = (arg.fg || '').trim(); c.bg = (arg.bg || '').trim(); }
+    const f = runReview(c); if (c.status === 'draft' || c.status === 'changes_requested') c.status = c.status === 'draft' ? 'ai_reviewed' : 'changes_requested';
+    log(c, 'AI review run', f.filter(x => x.severity !== 'info').length + ' finding(s) to decide, ' + f.filter(x => x.severity === 'info').length + ' supported claim(s)');
+    S.mode = 'review';
+  }
+  if (what === 'accept') {
+    if (!editable(c)) return;
+    const f = c.findings.find(x => x.id === arg); if (!f || f.replace === null || f.rs === null) return;
+    let end = f.re; if (f.replace === '') { const tail = c.text.slice(end).match(/^[,\s]+/); if (tail) end += tail[0].length; }
+    c.text = c.text.slice(0, f.rs) + f.replace + c.text.slice(end);
+    c.versions.push({ts: now(), actor: me().name, text: c.text});
+    c.decisions.push({rule: f.rule, snippet: f.snippet, decision: 'accepted', reason: '', ts: now()});
+    log(c, 'Accepted suggestion', f.rule + ': "' + f.snippet + '" -> "' + (f.replace || '(removed)') + '"');
+    runReview(c);
+  }
+  if (what === 'dismiss') {
+    if (!editable(c)) return;
+    const f = c.findings.find(x => x.id === arg.id); if (!f) return;
+    if (!arg.reason.trim()) return;
+    c.dismissed[f.key] = arg.reason.trim(); f.state = 'dismissed'; f.reason = arg.reason.trim();
+    c.decisions.push({rule: f.rule, snippet: f.snippet, decision: 'dismissed', reason: arg.reason.trim(), ts: now()});
+    log(c, 'Dismissed finding', f.rule + ': "' + f.snippet + '" - reason: ' + arg.reason.trim());
+  }
+  if (what === 'submit') {
+    if (!editable(c) || stale(c) || openHigh(c).length) return;
+    c.status = 'in_review'; log(c, 'Submitted for review', '');
+  }
+  if (what === 'approve') {
+    if (!['manager', 'reviewer'].includes(S.role)) return;
+    if (S.role === 'manager' && c.status === 'in_review') {
+      if (c.hadHigh) { c.status = 'awaiting_signoff'; log(c, 'Manager approved; high-risk content sent for sign-off', arg || ''); }
+      else { c.status = 'approved'; log(c, 'Manager approved', arg || ''); }
+    } else if (S.role === 'reviewer' && ['in_review', 'awaiting_signoff'].includes(c.status)) { c.status = 'approved'; log(c, 'Authorised reviewer signed off', arg || ''); }
+  }
+  if (what === 'changes') {
+    if (!['manager', 'reviewer'].includes(S.role) || !['in_review', 'awaiting_signoff'].includes(c.status)) return;
+    if (!arg || !arg.trim()) return;
+    c.status = 'changes_requested'; c.comments.push({ts: now(), actor: me().name, role: S.role, text: arg.trim()}); log(c, 'Requested changes', arg.trim());
+  }
+  if (what === 'publish') {
+    if (S.role !== 'creator' || c.status !== 'approved') return;
+    c.status = 'publish_ready'; log(c, 'Marked publish-ready and exported', '');
+    download(c.title.replace(/\W+/g, '_') + '_review_report.md', report(c));
+  }
+  if (what === 'comment') { if (!arg || !arg.trim()) return; c.comments.push({ts: now(), actor: me().name, role: S.role, text: arg.trim()}); log(c, 'Commented', arg.trim()); }
+  save(); render();
+}
+
+function report(c) {
+  const L = ['# Brand review report: ' + c.title, '', 'Status: ' + STATUS[c.status], 'Author: ' + USERS[c.author].name, 'Generated: ' + now(), '',
+    '## Final text', '', c.text, '', '## Findings', ''];
+  c.findings.forEach(f => L.push('- [' + f.severity.toUpperCase() + '] ' + RULES[f.rule] + ': "' + f.snippet + '" (' + f.state + (f.reason ? ': ' + f.reason : '') + ') - ' + f.why + ' Source: ' + f.source));
+  L.push('', '## AI disclosure', 'Checks were run by BrandSentinel rule engine and local text-similarity matching in the browser. No external AI service was used.', '', '## History', '');
+  c.history.forEach(h => L.push('- ' + h.ts + ' | ' + h.actor + ' | ' + h.action + (h.note ? ' | ' + h.note : '')));
+  return L.join('\n');
+}
+function download(name, text) {
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type: 'text/markdown'})); a.download = name; document.body.appendChild(a); a.click(); a.remove(); } catch (e) {}
+}
+
+/* ---------- image analysis ---------- */
+function analyseImage(file, cb) {
+  const fr = new FileReader();
+  fr.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const sc = Math.min(1, 480 / img.width); const w = Math.round(img.width * sc), h = Math.round(img.height * sc);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, w, h);
+      const d = cx.getImageData(0, 0, w, h).data; const b = {}; let n = 0;
+      for (let i = 0; i < d.length; i += 16) { if (d[i + 3] < 128) continue; const k = (d[i] >> 5) + ',' + (d[i + 1] >> 5) + ',' + (d[i + 2] >> 5); b[k] = (b[k] || 0) + 1; n++; }
+      const pal = S.kb.palette.map(hexRgb).filter(Boolean);
+      const colors = Object.entries(b).sort((x, y) => y[1] - x[1]).slice(0, 4).map(([k, v]) => {
+        const rgb = k.split(',').map(x => x * 32 + 16); const hex = '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+        let best = 1e9, bi = 0; pal.forEach((p, i) => { const dd = Math.hypot(p[0] - rgb[0], p[1] - rgb[1], p[2] - rgb[2]); if (dd < best) { best = dd; bi = i; } });
+        const neutral = Math.max(...rgb) - Math.min(...rgb) < 24;
+        return {hex, share: v / n, dist: Math.round(best), nearest: S.kb.palette[bi], off: !neutral && best > 70 && v / n >= 0.12};
+      });
+      cb({data: cv.toDataURL('image/jpeg', 0.7), w: img.width, h: img.height, colors});
+    };
+    img.onerror = () => cb(null);
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+/* ---------- views ---------- */
+const app = document.getElementById('app');
+const nav = document.getElementById('nav');
+const roleSel = document.getElementById('role');
+roleSel.innerHTML = Object.keys(USERS).map(k => '<option value="' + k + '">' + USERS[k].name + ' (' + USERS[k].title + ')</option>').join('');
+
+function render() {
+  roleSel.value = S.role;
+  const tabs = [['content', 'Content'], ['kb', 'Knowledge Base'], ['insights', 'Insights']];
+  nav.innerHTML = tabs.map(t => '<button data-nav="' + t[0] + '" class="' + (S.view === t[0] || (S.view === 'detail' && t[0] === 'content') ? 'on' : '') + '">' + t[1] + '</button>').join('');
+  app.innerHTML = S.view === 'detail' ? vDetail() : S.view === 'kb' ? vKB() : S.view === 'insights' ? vInsights() : vList();
+  if (S.view === 'detail') { const c = cur(); const ta = document.getElementById('txt'); if (ta && c) ta.value = c.text; }
+}
+const cur = () => S.contents.find(c => c.id === S.openId);
+const tag = s => '<span class="tag s-' + s + '">' + STATUS[s] + '</span>';
+
+function vList() {
+  const rows = S.contents.map(c => {
+    const open = c.findings.filter(f => f.severity !== 'info' && f.state === 'open').length;
+    return '<tr class="link" tabindex="0" data-open="' + c.id + '"><td><b>' + esc(c.title) + '</b><div class="small dim">' + esc(c.text.slice(0, 80)) + (c.text.length > 80 ? '...' : '') + '</div></td><td>' + tag(c.status) + '</td><td>' + (c.reviewedText === null ? '<span class="dim">Not reviewed</span>' : open + ' open') + '</td><td>' + esc(USERS[c.author].name) + '</td></tr>';
+  }).join('');
+  const queue = S.role === 'manager' ? S.contents.filter(c => c.status === 'in_review').length : S.role === 'reviewer' ? S.contents.filter(c => ['in_review', 'awaiting_signoff'].includes(c.status)).length : 0;
+  return '<h2>Content</h2>' +
+    (queue ? '<div class="banner">You have <b>' + queue + '</b> item(s) waiting for your decision.</div>' : '') +
+    '<div class="card"><table><thead><tr><th>Title</th><th>Status</th><th>Findings</th><th>Author</th></tr></thead><tbody>' + (rows || '<tr><td colspan="4" class="dim">No content yet.</td></tr>') + '</tbody></table></div>' +
+    '<div class="card"><h3>New content</h3>' + (S.role === 'creator' ?
+      '<label for="nt">Title</label><input type="text" id="nt" placeholder="e.g. Festival banner copy"><label for="nx" style="display:block;margin-top:8px">Text</label><textarea id="nx" rows="4" placeholder="Paste or type your content"></textarea><p><button class="btn" data-newc>Create draft</button> <button class="btn alt" data-reset>Reset demo data</button></p>' :
+      '<p class="dim">Switch to the creator (Priya Sharma) to add content. <button class="btn alt sm" data-reset>Reset demo data</button></p>') + '</div>';
+}
+
+function hl(c) {
+  const t = c.text; const spans = c.findings.filter(f => f.start >= 0 && f.state !== 'dismissed').sort((a, b) => a.start - b.start || (b.severity === 'high') - (a.severity === 'high'));
+  let out = '', pos = 0;
+  spans.forEach(f => { if (f.start < pos) return; out += esc(t.slice(pos, f.start)) + '<mark class="' + f.severity + '" data-f="' + f.id + '" tabindex="0" title="' + esc(RULES[f.rule]) + '">' + esc(t.slice(f.start, f.end)) + '</mark>'; pos = f.end; });
+  return out + esc(t.slice(pos));
+}
+
+function findCard(c, f) {
+  const can = editable(c); let acts = '';
+  if (f.severity !== 'info' && f.state === 'open' && can) {
+    acts = '<div class="acts">' + (f.replace !== null && f.rs !== null ? '<button class="btn sm" data-accept="' + f.id + '">' + (f.rule === 'CLAIM' || f.rule === 'ABS' ? 'Use approved wording' : 'Apply suggestion') + '</button>' : '') +
+      '<button class="btn alt sm" data-edit>Edit text myself</button><button class="btn alt sm" data-dis="' + f.id + '">Dismiss with reason</button></div>' +
+      '<div class="acts" id="dz-' + f.id + '" hidden><input type="text" id="dr-' + f.id + '" placeholder="Reason (required, recorded in audit trail)" aria-label="Dismiss reason"><button class="btn warn sm" data-dis-ok="' + f.id + '">Confirm dismiss</button></div>';
+  }
+  return '<div class="find ' + f.severity + '" id="' + f.id + '"><div class="meta"><span class="tag sev-' + f.severity + '">' + (f.severity === 'info' ? 'Supported' : f.severity) + '</span><b>' + RULES[f.rule] + '</b>' + (f.state === 'dismissed' ? '<span class="tag">Dismissed</span>' : '') + '</div>' +
+    '<div class="small"><i>"' + esc(f.snippet.length > 90 ? f.snippet.slice(0, 90) + '...' : f.snippet) + '"</i></div><div>' + esc(f.why) + '</div>' +
+    '<div class="src">Source: ' + esc(f.source) + '</div>' +
+    (f.suggestion && f.state !== 'dismissed' && f.severity !== 'info' ? '<div class="sug"><b>Suggested:</b> ' + esc(f.suggestion) + '</div>' : '') +
+    (f.advice && f.state !== 'dismissed' && f.severity !== 'info' ? '<div class="small dim">' + esc(f.advice) + '</div>' : '') +
+    (f.state === 'dismissed' ? '<div class="small dim">Reason: ' + esc(f.reason) + '</div>' : '') + acts + '</div>';
+}
+
+function vDetail() {
+  const c = cur(); if (!c) return vList();
+  const can = editable(c); const isEdit = S.mode === 'edit' && can;
+  const act_ = c.findings.filter(f => f.severity !== 'info'); const open = act_.filter(f => f.state === 'open');
+  const hi = openHigh(c).length;
+  let flow = '';
+  if (can) flow = '<button class="btn navy" data-submit ' + ((stale(c) || hi || c.reviewedText === null) ? 'disabled' : '') + '>Submit for review</button> ' +
+    (c.reviewedText === null || stale(c) ? '<span class="small dim">Run the review first.</span>' : hi ? '<span class="small dim">Decide on ' + hi + ' high-severity finding(s) to submit.</span>' : '');
+  if (['manager', 'reviewer'].includes(S.role) && ['in_review', 'awaiting_signoff'].includes(c.status)) {
+    const label = S.role === 'manager' && c.status === 'in_review' ? (c.hadHigh ? 'Approve and send for sign-off' : 'Approve') : 'Sign off and approve';
+    if (!(S.role === 'manager' && c.status === 'awaiting_signoff')) flow = '<button class="btn" data-approve>' + label + '</button> <input type="text" id="chg" style="width:260px" placeholder="Comment (required to request changes)" aria-label="Change request comment"> <button class="btn warn" data-changes>Request changes</button>';
+    else flow = '<span class="dim">Waiting for the Authorised Reviewer to sign off.</span>';
+  }
+  if (S.role === 'creator' && c.status === 'approved') flow = '<button class="btn navy" data-publish>Mark publish-ready and export report</button>';
+  if (!flow) flow = '<span class="dim small">No action available for your role at this stage.</span>';
+
+  const img = c.image ? '<div style="margin-top:8px"><img class="thumb" src="' + c.image.data + '" alt="' + esc(c.alt || 'Uploaded image preview') + '"><div class="small dim">Dominant colours: ' + c.image.colors.map(k => '<span class="sw" style="background:' + k.hex + '"></span>' + k.hex + (k.off ? ' (off-palette)' : '')).join(' ') + '</div></div>' : '';
+  const left = isEdit ?
+    '<label for="txt"><b>Edit text</b></label><textarea id="txt" rows="9"></textarea>' :
+    '<div class="doc" id="docv">' + hl(c) + '</div>';
+  const extra = can ? '<details style="margin-top:10px"' + (isEdit || c.image || c.fg ? ' open' : '') + '><summary>Image and colour checks (optional)</summary><div class="row" style="margin-top:8px"><div class="col"><label for="img">Upload image</label><input type="file" id="img" accept="image/*"><label for="alt" style="display:block;margin-top:6px">Alternative text</label><input type="text" id="alt" value="' + esc(c.alt) + '">' + img + '</div><div class="col"><label for="fg">Text colour (hex)</label><input type="text" id="fg" value="' + esc(c.fg) + '" placeholder="#777777"><label for="bg" style="display:block;margin-top:6px">Background colour (hex)</label><input type="text" id="bg" value="' + esc(c.bg) + '" placeholder="#FFFFFF"></div></div></details>' : (img ? img : '');
+
+  const cm = c.comments.map(x => '<li><b>' + esc(x.actor) + '</b> <span class="dim small">(' + fmt(x.ts) + ')</span><br>' + esc(x.text) + '</li>').join('');
+  const hist = c.history.slice().reverse().map(x => '<li><b>' + esc(x.action) + '</b> <span class="dim small">by ' + esc(x.actor) + ', ' + fmt(x.ts) + '</span>' + (x.note ? '<div class="small dim">' + esc(x.note) + '</div>' : '') + '</li>').join('');
+  const vers = c.versions.map((v, i) => '<details><summary>Version ' + (i + 1) + ' by ' + esc(v.actor) + ', ' + fmt(v.ts) + '</summary><div class="small" style="white-space:pre-wrap">' + esc(v.text) + '</div></details>').join('');
+  const ai = c.reviewedText === null ? '<div class="banner">This content has not been reviewed yet.</div>' : stale(c) ? '<div class="banner">The text changed after the last review. Run the review again.</div>' : '';
+  return '<p><button class="btn alt sm" data-back>&larr; All content</button></p>' +
+    '<h2>' + esc(c.title) + ' ' + tag(c.status) + '</h2>' + ai +
+    '<div class="row"><div class="col" style="flex:1.3"><div class="card"><h3>Content</h3>' + left +
+      (can ? '<p>' + (isEdit ? '' : '<button class="btn alt" data-edit>Edit text</button> ') + '<button class="btn" data-review>Run BrandSentinel review</button></p>' : '') + extra + '</div>' +
+      '<div class="card"><h3>Next step</h3>' + flow + '</div>' +
+      '<div class="card"><h3>Comments</h3><ul class="cm" style="padding-left:18px">' + (cm || '<li class="dim">No comments yet.</li>') + '</ul><div class="row"><input type="text" id="cmt" placeholder="Add a comment" aria-label="Add a comment" style="flex:1"><button class="btn alt" data-comment>Post</button></div></div></div>' +
+    '<div class="col"><div class="card"><h3>Findings (' + open.length + ' open of ' + act_.length + ')</h3><p class="small dim" style="margin-top:0">Nothing is changed unless you click. Every finding shows why it was flagged and which approved source it uses.</p>' +
+      (c.findings.length ? c.findings.map(f => findCard(c, f)).join('') : '<p class="dim">' + (c.reviewedText === null ? 'Run the review to see findings.' : 'No findings. Content matches the brand rules.') + '</p>') + '</div>' +
+      '<div class="card"><h3>History</h3><ul class="hist" style="padding-left:18px">' + hist + '</ul><details><summary>Versions (' + c.versions.length + ')</summary>' + vers + '</details></div></div></div>';
+}
+
+function vKB() {
+  const kb = S.kb; const adm = S.role === 'admin';
+  const dis = adm ? '' : ' disabled';
+  return '<h2>Knowledge Base <span class="dim small">' + esc(kb.brand) + '</span></h2>' + (adm ? '' : '<div class="banner">Only the Brand Admin can edit. Switch to Rohan Iyer (Brand Admin) to make changes.</div>') +
+    '<div class="row"><div class="col"><div class="card"><h3>Approved facts (' + kb.facts.length + ')</h3><table><tbody>' + kb.facts.map((f, i) => '<tr><td><b>' + esc(f.id) + '</b></td><td>' + esc(f.text) + '<div class="small dim">' + esc(f.source) + '</div></td><td>' + (adm ? '<button class="btn alt sm" data-delfact="' + i + '">Remove</button>' : '') + '</td></tr>').join('') + '</tbody></table>' +
+      '<p><label for="nf">Add facts (one per line: fact text | source)</label><textarea id="nf" rows="3" placeholder="Lumio Glow ships with a USB-C remote. | Spec Sheet v5"' + dis + '></textarea><button class="btn sm" data-addfacts' + dis + '>Add facts</button></p></div></div>' +
+    '<div class="col"><div class="card"><h3>Terminology (' + kb.terms.length + ')</h3><table><tbody>' + kb.terms.map((t, i) => '<tr><td>' + esc(t.bad) + ' &rarr; <b>' + esc(t.good) + '</b><div class="small dim">' + esc(t.why) + '</div></td><td>' + (adm ? '<button class="btn alt sm" data-delterm="' + i + '">Remove</button>' : '') + '</td></tr>').join('') + '</tbody></table>' +
+      '<div class="row" style="margin-top:8px"><input type="text" id="tb" placeholder="Avoid" aria-label="Term to avoid" style="flex:1"' + dis + '><input type="text" id="tg" placeholder="Use instead" aria-label="Preferred term" style="flex:1"' + dis + '><button class="btn sm" data-addterm' + dis + '>Add</button></div></div>' +
+      '<div class="card"><h3>Approved colour palette</h3>' + kb.palette.map(p => '<span class="sw" style="background:' + p + '"></span>' + p + ' &nbsp;').join('') + '<p class="small dim">Built-in policies: absolute claims (100%, guarantee, best...), tone and voice (slang, ALL CAPS, exclamation limit ' + kb.maxExclaim + '), accessibility (link text, sentence length, contrast, alt text).</p></div></div></div>';
+}
+
+function vInsights() {
+  const all = S.contents.flatMap(c => c.findings.filter(f => f.severity !== 'info').map(f => Object.assign({c: c.title}, f)));
+  const decs = S.contents.flatMap(c => c.decisions);
+  const dismissedAll = S.contents.flatMap(c => c.findings.filter(f => f.state === 'dismissed'));
+  const byRule = {}; Object.keys(RULES).forEach(r => byRule[r] = 0); all.forEach(f => byRule[f.rule]++);
+  const mx = Math.max(1, ...Object.values(byRule));
+  const stat = {}; S.contents.forEach(c => stat[c.status] = (stat[c.status] || 0) + 1);
+  const rec = {}; all.forEach(f => { const k = f.rule + ': ' + f.snippet.toLowerCase().slice(0, 40); rec[k] = (rec[k] || 0) + 1; });
+  const recTop = Object.entries(rec).filter(e => e[1] > 1).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const dec = {}; decs.forEach(d => { dec[d.rule] = dec[d.rule] || {a: 0, d: 0}; if (d.decision === 'accepted') dec[d.rule].a++; else dec[d.rule].d++; });
+  dismissedAll.forEach(f => { if (!decs.find(d => d.rule === f.rule && d.snippet === f.snippet)) { dec[f.rule] = dec[f.rule] || {a: 0, d: 0}; dec[f.rule].d++; } });
+  const unclear = Object.entries(dec).filter(([r, v]) => v.a + v.d >= 2 && v.d / (v.a + v.d) >= 0.5);
+  return '<h2>Insights</h2><div class="grid2"><div class="card"><div class="kpi">' + S.contents.length + '</div>items in workspace</div><div class="card"><div class="kpi">' + all.length + '</div>issues found in latest reviews</div><div class="card"><div class="kpi">' + decs.length + '</div>human decisions recorded</div><div class="card"><div class="kpi">' + (stat.publish_ready || 0) + '</div>publish-ready items</div></div>' +
+    '<div class="row"><div class="col"><div class="card"><h3>Issues by type</h3>' + Object.keys(RULES).map(r => '<div style="display:flex;gap:8px;align-items:center;margin:5px 0"><span style="width:150px" class="small">' + RULES[r] + '</span><div class="bar" style="width:' + (byRule[r] / mx * 100) + '%"></div><b>' + byRule[r] + '</b></div>').join('') + '</div>' +
+      '<div class="card"><h3>Repeated mistakes</h3>' + (recTop.length ? '<ul>' + recTop.map(e => '<li>' + esc(e[0]) + ' <b>x' + e[1] + '</b></li>').join('') + '</ul>' : '<p class="dim small">No repeated mistakes yet. This list fills as more content is reviewed.</p>') + '</div></div>' +
+    '<div class="col"><div class="card"><h3>Guideline health: rules that may be unclear</h3><p class="small dim" style="margin-top:0">A rule is flagged when creators dismiss at least half of its findings (minimum 2 decisions). That suggests the rule, not the creator, needs attention.</p>' +
+      (unclear.length ? '<ul>' + unclear.map(([r, v]) => '<li><b>' + RULES[r] + '</b>: ' + v.d + ' of ' + (v.a + v.d) + ' findings dismissed</li>').join('') + '</ul>' : '<p class="dim small">No unclear rules detected yet.</p>') + '</div>' +
+      '<div class="card"><h3>Recent audit trail</h3><ul class="hist" style="padding-left:18px">' + (S.audit.slice(-8).reverse().map(a => '<li><b>' + esc(a.action) + '</b> <span class="small dim">' + (a.content && a.content !== '-' ? esc(a.content) + ' - ' : '') + esc(a.actor) + ', ' + fmt(a.ts) + '</span></li>').join('') || '<li class="dim">No activity yet.</li>') + '</ul></div></div></div>';
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-nav],[data-open],[data-back],[data-newc],[data-reset],[data-edit],[data-review],[data-accept],[data-dis],[data-dis-ok],[data-submit],[data-approve],[data-changes],[data-publish],[data-comment],[data-f],[data-addfacts],[data-delfact],[data-addterm],[data-delterm]');
+  if (!t) return; const d = t.dataset; const c = cur();
+  if (d.nav) { S.view = d.nav; save(); render(); }
+  else if (d.open) { S.openId = d.open; S.view = 'detail'; S.mode = 'review'; save(); render(); }
+  else if (d.back !== undefined) { S.view = 'content'; save(); render(); }
+  else if (d.newc !== undefined) {
+    const title = document.getElementById('nt').value.trim() || 'Untitled'; const text = document.getElementById('nx').value; if (!text.trim()) return;
+    const n = {id: uid('c'), title, author: 'creator', text, status: 'draft', findings: [], dismissed: {}, decisions: [], comments: [], alt: '', image: null, fg: '', bg: '', reviewedText: null, hadHigh: false, versions: [{ts: now(), actor: me().name, text}], history: []};
+    S.contents.unshift(n); log(n, 'Created draft', ''); save(); render();
+  }
+  else if (d.reset !== undefined) { if (confirm('Reset all demo data?')) { S = {kb: seedKB(), contents: seedContents(), audit: [], role: S.role, view: 'content', openId: null, mode: 'review'}; save(); render(); } }
+  else if (d.edit !== undefined) { S.mode = 'edit'; render(); }
+  else if (d.review !== undefined) {
+    const ta = document.getElementById('txt');
+    act(c.id, 'review', {text: ta ? ta.value : c.text, alt: (document.getElementById('alt') || {}).value, fg: (document.getElementById('fg') || {}).value, bg: (document.getElementById('bg') || {}).value});
+  }
+  else if (d.accept) act(c.id, 'accept', d.accept);
+  else if (d.dis) { const z = document.getElementById('dz-' + d.dis); z.hidden = !z.hidden; if (!z.hidden) document.getElementById('dr-' + d.dis).focus(); }
+  else if (d.disOk) act(c.id, 'dismiss', {id: d.disOk, reason: document.getElementById('dr-' + d.disOk).value});
+  else if (d.submit !== undefined) act(c.id, 'submit');
+  else if (d.approve !== undefined) act(c.id, 'approve');
+  else if (d.changes !== undefined) act(c.id, 'changes', document.getElementById('chg').value);
+  else if (d.publish !== undefined) act(c.id, 'publish');
+  else if (d.comment !== undefined) act(c.id, 'comment', document.getElementById('cmt').value);
+  else if (d.f) { const el = document.getElementById(d.f); if (el) { el.scrollIntoView({behavior: 'smooth', block: 'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); } }
+  else if (d.addfacts !== undefined) {
+    document.getElementById('nf').value.split('\n').map(x => x.trim()).filter(Boolean).forEach(line => { const [tx, src] = line.split('|'); S.kb.facts.push({id: 'F' + (S.kb.facts.length + 1 + Math.floor(Math.random() * 90)), text: tx.trim(), source: (src || 'Added by Brand Admin').trim()}); });
+    log(null, 'Knowledge Base: facts added'); save(); render();
+  }
+  else if (d.delfact !== undefined) { S.kb.facts.splice(+d.delfact, 1); log(null, 'Knowledge Base: fact removed'); save(); render(); }
+  else if (d.addterm !== undefined) { const b = document.getElementById('tb').value.trim(), g = document.getElementById('tg').value.trim(); if (b && g) { S.kb.terms.push({bad: b, good: g, why: 'Added by Brand Admin.'}); log(null, 'Knowledge Base: term added', b + ' -> ' + g); save(); render(); } }
+  else if (d.delterm !== undefined) { S.kb.terms.splice(+d.delterm, 1); log(null, 'Knowledge Base: term removed'); save(); render(); }
+});
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-open],mark[data-f]')) { e.preventDefault(); e.target.click(); } });
+document.addEventListener('change', e => {
+  if (e.target.id === 'img' && e.target.files[0]) {
+    const c = cur(); const g = id => (document.getElementById(id) || {}).value; const keep = {alt: g('alt'), fg: g('fg'), bg: g('bg')}; analyseImage(e.target.files[0], info => { if (info) { c.image = info; c.alt = keep.alt || c.alt; c.fg = keep.fg || c.fg; c.bg = keep.bg || c.bg; save(); render(); } });
+  }
+});
+roleSel.addEventListener('change', () => { S.role = roleSel.value; if (S.view === 'detail') S.mode = 'review'; save(); render(); });
+
+window.BS = {reviewText: (t, o) => reviewText(t, S.kb, o), kb: () => S.kb, contrast};
+render();
+})();
+</script>
+</body>
+</html>
